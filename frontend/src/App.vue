@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import {
   Archive,
   Boxes,
@@ -13,7 +13,9 @@ import {
   LoaderCircle,
   Palette,
   RefreshCw,
+  Save,
   Sparkles,
+  Trash2,
   WandSparkles,
 } from '@lucide/vue'
 import { useAssetStore } from './stores/assets'
@@ -23,6 +25,8 @@ import type {
   GenerateRequest,
   GeneratedAsset,
   PalettePreset,
+  QualityStatus,
+  StylePack,
   StylePreset,
 } from './types/assets'
 
@@ -62,19 +66,82 @@ const request = reactive<GenerateRequest>({
   transparentBackground: true,
   palette: 'ocean',
   consistencySeed: 'qiniu-first-batch',
+  stylePackName: 'Dungeon Pixel Pack',
 })
 
+const stylePackFormName = ref(request.stylePackName)
+const selectedStylePackId = ref('')
+
 const activePalette = computed(() => palettes.find((palette) => palette.value === request.palette))
-const visibleAssets = computed(() => store.generated.length > 0 ? store.generated : store.history.slice(0, 6))
+const visibleAssets = computed(() => (store.generated.length > 0 ? store.generated : store.history.slice(0, 6)))
 const canExport = computed(() => store.generated.length > 0)
 const canGenerate = computed(() => request.description.trim().length > 0 && !store.loading)
+const qualitySummary = computed(() => {
+  const total = store.qualityChecks.length
+  const passed = store.qualityChecks.filter((check) => check.status === 'pass').length
+  return total ? `${passed}/${total} 通过` : '等待生成'
+})
 
 onMounted(() => {
   store.restoreHistory()
+  store.restoreStylePacks()
 })
 
+const normalizeId = (value: string) => {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+
+  return normalized || `style-pack-${Date.now().toString(36)}`
+}
+
 const runGeneration = async () => {
+  request.stylePackName = stylePackFormName.value?.trim() || undefined
   await store.generate({ ...request, description: request.description.trim() })
+}
+
+const saveCurrentStylePack = () => {
+  const name = stylePackFormName.value?.trim() || request.projectName.trim() || 'Untitled Style Pack'
+  const id = selectedStylePackId.value || normalizeId(name)
+  const pack: Omit<StylePack, 'updatedAt'> = {
+    id,
+    name,
+    description: request.description,
+    assetType: request.assetType,
+    style: request.style,
+    size: request.size,
+    transparentBackground: request.transparentBackground,
+    palette: request.palette,
+    consistencySeed: request.consistencySeed,
+  }
+
+  store.saveStylePack(pack)
+  selectedStylePackId.value = id
+  request.stylePackName = name
+  stylePackFormName.value = name
+}
+
+const applyStylePack = (pack: StylePack) => {
+  selectedStylePackId.value = pack.id
+  stylePackFormName.value = pack.name
+  request.stylePackName = pack.name
+  request.description = pack.description
+  request.assetType = pack.assetType
+  request.style = pack.style
+  request.size = pack.size
+  request.transparentBackground = pack.transparentBackground
+  request.palette = pack.palette
+  request.consistencySeed = pack.consistencySeed
+}
+
+const removeStylePack = (pack: StylePack) => {
+  store.deleteStylePack(pack.id)
+  if (selectedStylePackId.value === pack.id) {
+    selectedStylePackId.value = ''
+    request.stylePackName = stylePackFormName.value?.trim() || undefined
+  }
 }
 
 const applyHistoryAsset = (asset: GeneratedAsset) => {
@@ -83,6 +150,17 @@ const applyHistoryAsset = (asset: GeneratedAsset) => {
   request.size = asset.size
   request.description = String(asset.metadata.source_description ?? request.description)
   request.consistencySeed = asset.seed.split('-').slice(0, -1).join('-') || request.consistencySeed
+  const packName = String(asset.metadata.style_pack_name ?? '')
+  if (packName) {
+    request.stylePackName = packName
+    stylePackFormName.value = packName
+  }
+}
+
+const qualityStatusText = (status: QualityStatus) => {
+  if (status === 'pass') return '通过'
+  if (status === 'warn') return '注意'
+  return '失败'
 }
 
 const exportMetadata = () => {
@@ -93,6 +171,7 @@ const exportMetadata = () => {
           request,
           enhancedPrompt: store.enhancedPrompt,
           constraints: store.constraints,
+          qualityChecks: store.qualityChecks,
           assets: store.generated.map(({ dataUrl, ...asset }) => asset),
         },
         null,
@@ -137,6 +216,34 @@ const exportMetadata = () => {
           <span>项目名称</span>
           <input v-model="request.projectName" type="text" />
         </label>
+
+        <div class="style-pack-box">
+          <div class="style-pack-head">
+            <div>
+              <span>项目风格包</span>
+              <strong>{{ stylePackFormName || 'Untitled Style Pack' }}</strong>
+            </div>
+            <button type="button" title="保存风格包" @click="saveCurrentStylePack">
+              <Save :size="16" />
+            </button>
+          </div>
+          <label class="field compact-field">
+            <span>风格包名称</span>
+            <input v-model="stylePackFormName" type="text" />
+          </label>
+          <div class="style-pack-list">
+            <button
+              v-for="pack in store.stylePacks"
+              :key="pack.id"
+              type="button"
+              :class="{ active: selectedStylePackId === pack.id }"
+              @click="applyStylePack(pack)"
+            >
+              <span>{{ pack.name }}</span>
+              <small>{{ pack.style }} · {{ pack.size }}px · {{ pack.palette }}</small>
+            </button>
+          </div>
+        </div>
 
         <label class="field">
           <span>素材需求</span>
@@ -282,7 +389,11 @@ const exportMetadata = () => {
         </div>
 
         <div class="export-actions">
-          <button type="button" :disabled="!canExport" @click="exportZipPackage(store.generated, request)">
+          <button
+            type="button"
+            :disabled="!canExport"
+            @click="exportZipPackage(store.generated, request, store.qualityChecks)"
+          >
             <ImageDown :size="18" />
             <span>ZIP</span>
           </button>
@@ -302,6 +413,10 @@ const exportMetadata = () => {
         </div>
         <dl class="spec-list">
           <div>
+            <dt>风格包</dt>
+            <dd>{{ stylePackFormName || '-' }}</dd>
+          </div>
+          <div>
             <dt>类型</dt>
             <dd>{{ request.assetType }}</dd>
           </div>
@@ -318,6 +433,27 @@ const exportMetadata = () => {
             <dd>{{ request.count }}</dd>
           </div>
         </dl>
+
+        <div class="panel-title compact">
+          <CheckCircle2 :size="19" />
+          <h2>质量检查</h2>
+          <span class="quality-summary">{{ qualitySummary }}</span>
+        </div>
+        <div class="quality-list">
+          <div
+            v-for="check in store.qualityChecks"
+            :key="check.key"
+            class="quality-item"
+            :class="check.status"
+          >
+            <div>
+              <strong>{{ check.label }}</strong>
+              <span>{{ qualityStatusText(check.status) }}</span>
+            </div>
+            <p>{{ check.detail }}</p>
+          </div>
+          <p v-if="store.qualityChecks.length === 0" class="muted">生成后展示验收结果</p>
+        </div>
 
         <div class="history-head">
           <div class="panel-title compact">
@@ -340,6 +476,19 @@ const exportMetadata = () => {
             <span>{{ asset.name }}</span>
           </button>
           <p v-if="store.history.length === 0" class="muted">暂无历史记录</p>
+        </div>
+
+        <div class="pack-delete-list" v-if="store.stylePacks.length">
+          <button
+            v-for="pack in store.stylePacks"
+            :key="`delete-${pack.id}`"
+            type="button"
+            title="删除风格包"
+            @click="removeStylePack(pack)"
+          >
+            <Trash2 :size="15" />
+            <span>{{ pack.name }}</span>
+          </button>
         </div>
       </aside>
     </main>

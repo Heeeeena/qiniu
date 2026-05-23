@@ -1,6 +1,6 @@
 import { saveAs } from 'file-saver'
 import JSZip from 'jszip'
-import type { GeneratedAsset, GenerateRequest } from '../types/assets'
+import type { GeneratedAsset, GenerateRequest, QualityCheck } from '../types/assets'
 
 const dataUrlToBlob = async (dataUrl: string): Promise<Blob> => {
   const response = await fetch(dataUrl)
@@ -19,7 +19,11 @@ export const exportSinglePng = async (asset: GeneratedAsset) => {
   saveAs(blob, `${safeName(asset.name)}.png`)
 }
 
-export const exportZipPackage = async (assets: GeneratedAsset[], request: GenerateRequest) => {
+export const exportZipPackage = async (
+  assets: GeneratedAsset[],
+  request: GenerateRequest,
+  qualityChecks: QualityCheck[] = [],
+) => {
   const zip = new JSZip()
   const imageFolder = zip.folder('images')
 
@@ -37,6 +41,7 @@ export const exportZipPackage = async (assets: GeneratedAsset[], request: Genera
         project: request.projectName,
         exportedAt: new Date().toISOString(),
         request,
+        qualityChecks,
         assets: assets.map(({ dataUrl, ...asset }) => asset),
       },
       null,
