@@ -11,7 +11,9 @@
 - 参数化素材生成：支持角色、道具、瓦片、背景、UI 五类素材。
 - 风格与色板约束：支持像素、卡通、手绘、暗黑、科幻风格，以及 Ember、Forest、Ocean、Candy、Mono 色板。
 - 一致性种子：同一项目复用 seed，便于生成风格统一的素材包。
+- 项目风格包：保存并复用素材类型、风格、色板、尺寸、透明背景和 seed，支持多套项目规范切换。
 - Prompt 增强：后端将用户需求补全为更适合 2D 游戏素材生产的 Prompt。
+- 质量检查：生成后自动检查尺寸、Alpha 通道、metadata、Sprite Sheet 适配和风格一致性。
 - 游戏开发导出：支持单张 PNG、批量 ZIP、Sprite Sheet、metadata.json。
 - 历史记录：浏览器本地保存最近生成结果，可快速复用参数。
 
@@ -90,11 +92,23 @@ Windows PowerShell 下也可以使用：
   "count": 4,
   "transparent_background": true,
   "palette": "ocean",
-  "consistency_seed": "qiniu-first-batch"
+  "consistency_seed": "qiniu-first-batch",
+  "style_pack_name": "Dungeon Pixel Pack"
 }
 ```
 
-响应包含增强 Prompt、约束标签和 PNG Data URL。
+响应包含增强 Prompt、约束标签、质量检查结果和 PNG Data URL。
+
+质量检查示例：
+
+```json
+{
+  "key": "spritesheet",
+  "label": "Sprite Sheet",
+  "status": "pass",
+  "detail": "当前批次可按统一网格拼接，适合导入 Unity、Godot、Cocos 或 Aseprite。"
+}
+```
 
 ## 导出格式
 
@@ -102,6 +116,7 @@ Windows PowerShell 下也可以使用：
 - `ZIP`：包含 `/images`、`metadata.json` 和导入说明。
 - `Sprite Sheet`：将当前批次素材拼接成统一网格图。
 - `metadata.json`：记录素材类型、风格、尺寸、Prompt、seed 和生成时间。
+- `qualityChecks`：记录尺寸、透明通道、metadata、Sprite Sheet 和风格一致性检查结果。
 
 ## 目录结构
 

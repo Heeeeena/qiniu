@@ -27,7 +27,8 @@
   "count": 4,
   "transparent_background": true,
   "palette": "ocean",
-  "consistency_seed": "qiniu-first-batch"
+  "consistency_seed": "qiniu-first-batch",
+  "style_pack_name": "Dungeon Pixel Pack"
 }
 ```
 
@@ -38,6 +39,14 @@
   "request_id": "uuid",
   "enhanced_prompt": "enhanced prompt",
   "constraints": ["type:item", "style:pixel", "size:128px"],
+  "quality_checks": [
+    {
+      "key": "dimension",
+      "label": "尺寸规范",
+      "status": "pass",
+      "detail": "目标尺寸 128x128px，检测到 [(128, 128)]。"
+    }
+  ],
   "assets": [
     {
       "id": "asset-id",
@@ -51,6 +60,7 @@
       "created_at": "2026-05-23T00:00:00+00:00",
       "metadata": {
         "project_name": "Dungeon Starter Kit",
+        "style_pack_name": "Dungeon Pixel Pack",
         "palette": "ocean",
         "generator": "local-pillow"
       }
@@ -65,3 +75,4 @@
 - `POST /api/assets/remove-background`：背景移除。
 - `POST /api/assets/export/spritesheet`：服务端 Sprite Sheet。
 - `POST /api/projects`：项目级风格包持久化。
+- `GET /api/style-packs`：服务端同步项目风格包。
