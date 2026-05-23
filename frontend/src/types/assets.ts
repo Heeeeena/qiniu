@@ -4,6 +4,8 @@ export type AssetStyle = 'pixel' | 'cartoon' | 'ink' | 'dark' | 'sci-fi'
 
 export type PaletteName = 'ember' | 'forest' | 'ocean' | 'candy' | 'mono'
 
+export type QualityStatus = 'pass' | 'warn' | 'fail'
+
 export interface GenerateRequest {
   projectName: string
   description: string
@@ -14,6 +16,7 @@ export interface GenerateRequest {
   transparentBackground: boolean
   palette: PaletteName
   consistencySeed: string
+  stylePackName?: string
 }
 
 export interface GeneratedAsset {
@@ -33,7 +36,28 @@ export interface GenerateResponse {
   requestId: string
   enhancedPrompt: string
   constraints: string[]
+  qualityChecks: QualityCheck[]
   assets: GeneratedAsset[]
+}
+
+export interface QualityCheck {
+  key: string
+  label: string
+  status: QualityStatus
+  detail: string
+}
+
+export interface StylePack {
+  id: string
+  name: string
+  description: string
+  assetType: AssetType
+  style: AssetStyle
+  size: number
+  transparentBackground: boolean
+  palette: PaletteName
+  consistencySeed: string
+  updatedAt: string
 }
 
 export interface StylePreset {

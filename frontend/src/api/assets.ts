@@ -16,6 +16,7 @@ const toApiPayload = (payload: GenerateRequest) => ({
   transparent_background: payload.transparentBackground,
   palette: payload.palette,
   consistency_seed: payload.consistencySeed,
+  style_pack_name: payload.stylePackName,
 })
 
 const toClientAsset = (asset: any) => ({
@@ -38,6 +39,12 @@ export const generateAssets = async (payload: GenerateRequest): Promise<Generate
     requestId: data.request_id,
     enhancedPrompt: data.enhanced_prompt,
     constraints: data.constraints,
+    qualityChecks: data.quality_checks.map((check: any) => ({
+      key: check.key,
+      label: check.label,
+      status: check.status,
+      detail: check.detail,
+    })),
     assets: data.assets.map(toClientAsset),
   }
 }
