@@ -22,6 +22,8 @@ const defaultStylePacks = (): StylePack[] => [
     transparentBackground: true,
     palette: 'ocean',
     consistencySeed: 'qiniu-dungeon-pack',
+    targetEngine: 'unity',
+    namingPrefix: 'dungeon_pixel',
     updatedAt: new Date().toISOString(),
   },
   {
@@ -34,9 +36,26 @@ const defaultStylePacks = (): StylePack[] => [
     transparentBackground: true,
     palette: 'forest',
     consistencySeed: 'qiniu-forest-pack',
+    targetEngine: 'godot',
+    namingPrefix: 'forest_cartoon',
     updatedAt: new Date().toISOString(),
   },
 ]
+
+const normalizeStylePack = (pack: Partial<StylePack>, index: number): StylePack => ({
+  id: pack.id ?? `style-pack-${index + 1}`,
+  name: pack.name ?? `Style Pack ${index + 1}`,
+  description: pack.description ?? '',
+  assetType: pack.assetType ?? 'item',
+  style: pack.style ?? 'pixel',
+  size: pack.size ?? 128,
+  transparentBackground: pack.transparentBackground ?? true,
+  palette: pack.palette ?? 'ocean',
+  consistencySeed: pack.consistencySeed ?? `style-pack-${index + 1}`,
+  targetEngine: pack.targetEngine ?? 'unity',
+  namingPrefix: pack.namingPrefix,
+  updatedAt: pack.updatedAt ?? new Date().toISOString(),
+})
 
 interface AssetState {
   generated: GeneratedAsset[]
@@ -80,7 +99,8 @@ export const useAssetStore = defineStore('assets', {
       }
 
       try {
-        this.stylePacks = JSON.parse(raw)
+        this.stylePacks = JSON.parse(raw).map(normalizeStylePack)
+        this.persistStylePacks()
       } catch {
         this.stylePacks = defaultStylePacks()
         this.persistStylePacks()

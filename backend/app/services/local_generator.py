@@ -45,6 +45,8 @@ class LocalAssetGenerator:
                     metadata={
                         "project_name": request.project_name,
                         "style_pack_name": request.style_pack_name or "",
+                        "target_engine": request.target_engine,
+                        "naming_prefix": request.naming_prefix or "",
                         "source_description": request.description,
                         "palette": request.palette,
                         "transparent_background": request.transparent_background,

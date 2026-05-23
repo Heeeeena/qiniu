@@ -22,6 +22,7 @@ import { useAssetStore } from './stores/assets'
 import { exportSinglePng, exportSpriteSheet, exportZipPackage } from './utils/exportAssets'
 import type {
   AssetTypePreset,
+  EnginePreset,
   GenerateRequest,
   GeneratedAsset,
   PalettePreset,
@@ -56,6 +57,14 @@ const palettes: PalettePreset[] = [
   { label: 'Mono', value: 'mono', colors: ['#121212', '#555555', '#aaaaaa', '#f5f5f5'] },
 ]
 
+const engines: EnginePreset[] = [
+  { label: 'Unity', value: 'unity', hint: 'Sprite Editor / Sprite Atlas' },
+  { label: 'Godot', value: 'godot', hint: 'Sprite2D / AtlasTexture / TileSet' },
+  { label: 'Cocos', value: 'cocos', hint: 'Cocos Creator SpriteFrame' },
+  { label: 'Tiled', value: 'tiled', hint: 'TileMap external tileset' },
+  { label: 'Aseprite', value: 'aseprite', hint: 'Sprite sheet editing' },
+]
+
 const request = reactive<GenerateRequest>({
   projectName: 'Dungeon Starter Kit',
   description: '一套地牢探索游戏里的蓝色魔法水晶、入口石门和发光地砖',
@@ -67,6 +76,8 @@ const request = reactive<GenerateRequest>({
   palette: 'ocean',
   consistencySeed: 'qiniu-first-batch',
   stylePackName: 'Dungeon Pixel Pack',
+  targetEngine: 'unity',
+  namingPrefix: 'dungeon_pixel',
 })
 
 const stylePackFormName = ref(request.stylePackName)
@@ -115,6 +126,8 @@ const saveCurrentStylePack = () => {
     transparentBackground: request.transparentBackground,
     palette: request.palette,
     consistencySeed: request.consistencySeed,
+    targetEngine: request.targetEngine,
+    namingPrefix: request.namingPrefix,
   }
 
   store.saveStylePack(pack)
@@ -134,6 +147,8 @@ const applyStylePack = (pack: StylePack) => {
   request.transparentBackground = pack.transparentBackground
   request.palette = pack.palette
   request.consistencySeed = pack.consistencySeed
+  request.targetEngine = pack.targetEngine
+  request.namingPrefix = pack.namingPrefix
 }
 
 const removeStylePack = (pack: StylePack) => {
@@ -299,6 +314,27 @@ const exportMetadata = () => {
         </div>
 
         <div class="field">
+          <span>目标引擎</span>
+          <div class="segmented engine-segmented">
+            <button
+              v-for="engine in engines"
+              :key="engine.value"
+              type="button"
+              :class="{ active: request.targetEngine === engine.value }"
+              :title="engine.hint"
+              @click="request.targetEngine = engine.value"
+            >
+              {{ engine.label }}
+            </button>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>批次命名前缀</span>
+          <input v-model="request.namingPrefix" type="text" placeholder="dungeon_crystal" />
+        </label>
+
+        <div class="field">
           <span>色板</span>
           <div class="palette-list">
             <button
@@ -356,7 +392,7 @@ const exportMetadata = () => {
         <div v-if="store.error" class="error-box">{{ store.error }}</div>
 
         <div class="asset-grid" :class="{ empty: visibleAssets.length === 0 }">
-          <article v-for="asset in visibleAssets" :key="asset.id" class="asset-card">
+          <article v-for="(asset, index) in visibleAssets" :key="asset.id" class="asset-card">
             <div class="asset-canvas">
               <img :src="asset.dataUrl" :alt="asset.name" />
             </div>
@@ -365,7 +401,7 @@ const exportMetadata = () => {
                 <h3>{{ asset.name }}</h3>
                 <p>{{ asset.size }}px · {{ asset.style }}</p>
               </div>
-              <button type="button" title="下载 PNG" @click="exportSinglePng(asset)">
+              <button type="button" title="下载 PNG" @click="exportSinglePng(asset, request, index)">
                 <Download :size="17" />
               </button>
             </div>
@@ -415,6 +451,14 @@ const exportMetadata = () => {
           <div>
             <dt>风格包</dt>
             <dd>{{ stylePackFormName || '-' }}</dd>
+          </div>
+          <div>
+            <dt>引擎</dt>
+            <dd>{{ request.targetEngine }}</dd>
+          </div>
+          <div>
+            <dt>前缀</dt>
+            <dd>{{ request.namingPrefix || '-' }}</dd>
           </div>
           <div>
             <dt>类型</dt>

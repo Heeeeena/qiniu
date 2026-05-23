@@ -14,7 +14,9 @@
 - 项目风格包：保存并复用素材类型、风格、色板、尺寸、透明背景和 seed，支持多套项目规范切换。
 - Prompt 增强：后端将用户需求补全为更适合 2D 游戏素材生产的 Prompt。
 - 质量检查：生成后自动检查尺寸、Alpha 通道、metadata、Sprite Sheet 适配和风格一致性。
-- 游戏开发导出：支持单张 PNG、批量 ZIP、Sprite Sheet、metadata.json。
+- 游戏开发导出：支持单张 PNG、批量 ZIP、Sprite Sheet、metadata.json、Sprite Sheet manifest 和引擎导入说明。
+- 引擎预设：支持 Unity、Godot、Cocos、Tiled、Aseprite 导出工作流。
+- 批次命名规则：支持设置命名前缀，导出文件名和 Sprite Sheet 帧名保持一致。
 - 历史记录：浏览器本地保存最近生成结果，可快速复用参数。
 
 ## 技术架构
@@ -93,7 +95,9 @@ Windows PowerShell 下也可以使用：
   "transparent_background": true,
   "palette": "ocean",
   "consistency_seed": "qiniu-first-batch",
-  "style_pack_name": "Dungeon Pixel Pack"
+  "style_pack_name": "Dungeon Pixel Pack",
+  "target_engine": "unity",
+  "naming_prefix": "dungeon_pixel"
 }
 ```
 
@@ -113,8 +117,9 @@ Windows PowerShell 下也可以使用：
 ## 导出格式
 
 - `PNG`：单张素材，可直接导入游戏引擎。
-- `ZIP`：包含 `/images`、`metadata.json` 和导入说明。
+- `ZIP`：包含 `/images`、`/spritesheet`、`metadata.json`、`engine-import-guide.md` 和导入说明。
 - `Sprite Sheet`：将当前批次素材拼接成统一网格图。
+- `spritesheet.json`：记录每帧素材在 Sprite Sheet 中的 `x`、`y`、`width`、`height`、原文件名、seed 和素材类型。
 - `metadata.json`：记录素材类型、风格、尺寸、Prompt、seed 和生成时间。
 - `qualityChecks`：记录尺寸、透明通道、metadata、Sprite Sheet 和风格一致性检查结果。
 

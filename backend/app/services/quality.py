@@ -15,6 +15,8 @@ def inspect_assets(request: GenerateRequest, assets: list[GeneratedAsset]) -> li
     required_metadata = {
         "project_name",
         "style_pack_name",
+        "target_engine",
+        "naming_prefix",
         "source_description",
         "palette",
         "transparent_background",
@@ -54,6 +56,18 @@ def inspect_assets(request: GenerateRequest, assets: list[GeneratedAsset]) -> li
             label="Sprite Sheet",
             status="pass" if assets and len(set(sizes)) == 1 and len(assets) <= 8 else "warn",
             detail="当前批次可按统一网格拼接，适合导入 Unity、Godot、Cocos 或 Aseprite。",
+        ),
+        QualityCheck(
+            key="engine_export",
+            label="引擎导出",
+            status="pass" if request.target_engine in {"unity", "godot", "cocos", "tiled", "aseprite"} else "warn",
+            detail=f"当前导出目标为 {request.target_engine}，ZIP 将包含对应导入说明和 Sprite Sheet manifest。",
+        ),
+        QualityCheck(
+            key="naming",
+            label="命名规范",
+            status="pass" if request.naming_prefix else "warn",
+            detail="建议设置批次命名前缀，便于引擎资源检索、版本管理和 Sprite Sheet 帧名映射。",
         ),
         QualityCheck(
             key="style_consistency",
@@ -107,5 +121,7 @@ def _metadata_matches_request(request: GenerateRequest, assets: list[GeneratedAs
         and asset.seed.startswith(request.consistency_seed)
         and asset.metadata.get("palette") == request.palette
         and asset.metadata.get("style_pack_name") == (request.style_pack_name or "")
+        and asset.metadata.get("target_engine") == request.target_engine
+        and asset.metadata.get("naming_prefix") == (request.naming_prefix or "")
         for asset in assets
     )

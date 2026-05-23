@@ -28,7 +28,9 @@
   "transparent_background": true,
   "palette": "ocean",
   "consistency_seed": "qiniu-first-batch",
-  "style_pack_name": "Dungeon Pixel Pack"
+  "style_pack_name": "Dungeon Pixel Pack",
+  "target_engine": "unity",
+  "naming_prefix": "dungeon_pixel"
 }
 ```
 
@@ -61,6 +63,8 @@
       "metadata": {
         "project_name": "Dungeon Starter Kit",
         "style_pack_name": "Dungeon Pixel Pack",
+        "target_engine": "unity",
+        "naming_prefix": "dungeon_pixel",
         "palette": "ocean",
         "generator": "local-pillow"
       }
@@ -76,3 +80,4 @@
 - `POST /api/assets/export/spritesheet`：服务端 Sprite Sheet。
 - `POST /api/projects`：项目级风格包持久化。
 - `GET /api/style-packs`：服务端同步项目风格包。
+- `POST /api/exports/engine-package`：服务端生成引擎导出包。

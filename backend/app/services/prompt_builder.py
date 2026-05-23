@@ -33,14 +33,23 @@ PIPELINE_HINTS = {
     "ui": "use clear button states and leave center space for localization-friendly labels",
 }
 
+ENGINE_HINTS = {
+    "unity": "prepare naming and sheet metadata for Unity Sprite Editor and Sprite Atlas",
+    "godot": "prepare import notes for Godot Sprite2D, AtlasTexture, and TileSet workflows",
+    "cocos": "prepare asset naming for Cocos Creator resources and SpriteFrame usage",
+    "tiled": "prepare tile-friendly metadata for Tiled maps and external tilesets",
+    "aseprite": "prepare predictable frame names for Aseprite sheet inspection and edits",
+}
+
 
 def build_prompt(request: GenerateRequest) -> tuple[str, list[str]]:
     background = "transparent background" if request.transparent_background else "solid presentation background"
     style_pack = f"style pack: {request.style_pack_name}; " if request.style_pack_name else ""
+    naming = f"naming prefix: {request.naming_prefix}; " if request.naming_prefix else ""
     prompt = (
-        f"{style_pack}{request.description}; {ASSET_HINTS[request.asset_type]}; "
+        f"{style_pack}{naming}{request.description}; {ASSET_HINTS[request.asset_type]}; "
         f"{STYLE_HINTS[request.style]}; {background}; "
-        f"{PIPELINE_HINTS[request.asset_type]}; "
+        f"{PIPELINE_HINTS[request.asset_type]}; {ENGINE_HINTS[request.target_engine]}; "
         f"{request.size}x{request.size}px; palette: {PALETTE_HINTS[request.palette]}; "
         "game engine friendly PNG, Unity/Godot/Cocos import-ready, consistent asset pack, no watermark, no text."
     )
@@ -50,9 +59,12 @@ def build_prompt(request: GenerateRequest) -> tuple[str, list[str]]:
         f"size:{request.size}px",
         f"palette:{request.palette}",
         f"seed:{request.consistency_seed}",
+        f"engine:{request.target_engine}",
     ]
     if request.style_pack_name:
         constraints.append(f"pack:{request.style_pack_name}")
+    if request.naming_prefix:
+        constraints.append(f"prefix:{request.naming_prefix}")
     if request.transparent_background:
         constraints.append("transparent")
     return prompt, constraints
