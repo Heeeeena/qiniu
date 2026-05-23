@@ -44,6 +44,7 @@ class LocalAssetGenerator:
                     created_at=datetime.now(UTC).isoformat(),
                     metadata={
                         "project_name": request.project_name,
+                        "style_pack_name": request.style_pack_name or "",
                         "source_description": request.description,
                         "palette": request.palette,
                         "transparent_background": request.transparent_background,

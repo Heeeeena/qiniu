@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 AssetType = Literal["character", "item", "tile", "background", "ui"]
 AssetStyle = Literal["pixel", "cartoon", "ink", "dark", "sci-fi"]
 PaletteName = Literal["ember", "forest", "ocean", "candy", "mono"]
+QualityStatus = Literal["pass", "warn", "fail"]
 
 
 class GenerateRequest(BaseModel):
@@ -18,6 +19,7 @@ class GenerateRequest(BaseModel):
     transparent_background: bool = True
     palette: PaletteName = "ocean"
     consistency_seed: str = Field(default="default", min_length=1, max_length=80)
+    style_pack_name: str | None = Field(default=None, max_length=80)
 
     @field_validator("size")
     @classmethod
@@ -30,6 +32,14 @@ class GenerateRequest(BaseModel):
     @classmethod
     def trim_text(cls, value: str) -> str:
         return value.strip()
+
+    @field_validator("style_pack_name")
+    @classmethod
+    def trim_optional_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        trimmed = value.strip()
+        return trimmed or None
 
 
 class GeneratedAsset(BaseModel):
@@ -45,8 +55,16 @@ class GeneratedAsset(BaseModel):
     metadata: dict[str, str | int | bool]
 
 
+class QualityCheck(BaseModel):
+    key: str
+    label: str
+    status: QualityStatus
+    detail: str
+
+
 class GenerateResponse(BaseModel):
     request_id: str
     enhanced_prompt: str
     constraints: list[str]
+    quality_checks: list[QualityCheck]
     assets: list[GeneratedAsset]

@@ -25,14 +25,24 @@ PALETTE_HINTS = {
     "mono": "black, graphite, silver, white",
 }
 
+PIPELINE_HINTS = {
+    "character": "export as a single sprite that can later be sliced into idle, walk, and attack frames",
+    "item": "leave enough transparent padding for inventory UI, loot popups, and icon atlases",
+    "tile": "keep tile edges grid-aligned and repeat-friendly for Tiled, Godot TileMap, or Unity Tile Palette",
+    "background": "separate foreground readability from distant shapes for parallax layer usage",
+    "ui": "use clear button states and leave center space for localization-friendly labels",
+}
+
 
 def build_prompt(request: GenerateRequest) -> tuple[str, list[str]]:
     background = "transparent background" if request.transparent_background else "solid presentation background"
+    style_pack = f"style pack: {request.style_pack_name}; " if request.style_pack_name else ""
     prompt = (
-        f"{request.description}; {ASSET_HINTS[request.asset_type]}; "
+        f"{style_pack}{request.description}; {ASSET_HINTS[request.asset_type]}; "
         f"{STYLE_HINTS[request.style]}; {background}; "
+        f"{PIPELINE_HINTS[request.asset_type]}; "
         f"{request.size}x{request.size}px; palette: {PALETTE_HINTS[request.palette]}; "
-        "game engine friendly PNG, consistent asset pack, no watermark, no text."
+        "game engine friendly PNG, Unity/Godot/Cocos import-ready, consistent asset pack, no watermark, no text."
     )
     constraints = [
         f"type:{request.asset_type}",
@@ -41,6 +51,8 @@ def build_prompt(request: GenerateRequest) -> tuple[str, list[str]]:
         f"palette:{request.palette}",
         f"seed:{request.consistency_seed}",
     ]
+    if request.style_pack_name:
+        constraints.append(f"pack:{request.style_pack_name}")
     if request.transparent_background:
         constraints.append("transparent")
     return prompt, constraints
