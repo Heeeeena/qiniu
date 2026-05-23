@@ -23,17 +23,22 @@ def test_prompt_builder_adds_game_asset_constraints() -> None:
         palette="ocean",
         consistency_seed="demo-seed",
         style_pack_name="Dungeon Pixel Pack",
+        target_engine="unity",
+        naming_prefix="demo_item",
     )
 
     prompt, constraints = build_prompt(request)
 
     assert "2D game item icon" in prompt
     assert "style pack: Dungeon Pixel Pack" in prompt
+    assert "naming prefix: demo_item" in prompt
     assert "Unity/Godot/Cocos import-ready" in prompt
     assert "transparent background" in prompt
     assert "128x128px" in prompt
     assert "type:item" in constraints
     assert "pack:Dungeon Pixel Pack" in constraints
+    assert "engine:unity" in constraints
+    assert "prefix:demo_item" in constraints
     assert "seed:demo-seed" in constraints
 
 
@@ -53,6 +58,8 @@ def test_generate_assets_endpoint_returns_png_data_urls() -> None:
             "palette": "ocean",
             "consistency_seed": "demo-seed",
             "style_pack_name": "Dungeon Pixel Pack",
+            "target_engine": "unity",
+            "naming_prefix": "demo_item",
         },
     )
 
@@ -64,8 +71,12 @@ def test_generate_assets_endpoint_returns_png_data_urls() -> None:
     assert payload["assets"][0]["data_url"].startswith("data:image/png;base64,")
     assert payload["assets"][0]["metadata"]["generator"] == "local-pillow"
     assert payload["assets"][0]["metadata"]["style_pack_name"] == "Dungeon Pixel Pack"
+    assert payload["assets"][0]["metadata"]["target_engine"] == "unity"
+    assert payload["assets"][0]["metadata"]["naming_prefix"] == "demo_item"
 
     quality_by_key = {check["key"]: check for check in payload["quality_checks"]}
     assert quality_by_key["dimension"]["status"] == "pass"
     assert quality_by_key["metadata"]["status"] == "pass"
+    assert quality_by_key["engine_export"]["status"] == "pass"
+    assert quality_by_key["naming"]["status"] == "pass"
     assert quality_by_key["style_consistency"]["status"] == "pass"

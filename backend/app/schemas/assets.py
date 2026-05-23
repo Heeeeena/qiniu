@@ -7,6 +7,7 @@ AssetType = Literal["character", "item", "tile", "background", "ui"]
 AssetStyle = Literal["pixel", "cartoon", "ink", "dark", "sci-fi"]
 PaletteName = Literal["ember", "forest", "ocean", "candy", "mono"]
 QualityStatus = Literal["pass", "warn", "fail"]
+TargetEngine = Literal["unity", "godot", "cocos", "tiled", "aseprite"]
 
 
 class GenerateRequest(BaseModel):
@@ -20,6 +21,8 @@ class GenerateRequest(BaseModel):
     palette: PaletteName = "ocean"
     consistency_seed: str = Field(default="default", min_length=1, max_length=80)
     style_pack_name: str | None = Field(default=None, max_length=80)
+    target_engine: TargetEngine = "unity"
+    naming_prefix: str | None = Field(default=None, max_length=80)
 
     @field_validator("size")
     @classmethod
@@ -40,6 +43,14 @@ class GenerateRequest(BaseModel):
             return value
         trimmed = value.strip()
         return trimmed or None
+
+    @field_validator("naming_prefix")
+    @classmethod
+    def normalize_naming_prefix(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        normalized = value.strip().lower().replace(" ", "_").replace("-", "_")
+        return normalized or None
 
 
 class GeneratedAsset(BaseModel):
