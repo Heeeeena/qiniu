@@ -17,6 +17,8 @@ const toApiPayload = (payload: GenerateRequest) => ({
   palette: payload.palette,
   consistency_seed: payload.consistencySeed,
   style_pack_name: payload.stylePackName,
+  target_engine: payload.targetEngine,
+  naming_prefix: payload.namingPrefix,
 })
 
 const toClientAsset = (asset: any) => ({

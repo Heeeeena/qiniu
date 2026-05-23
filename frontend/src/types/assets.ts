@@ -6,6 +6,8 @@ export type PaletteName = 'ember' | 'forest' | 'ocean' | 'candy' | 'mono'
 
 export type QualityStatus = 'pass' | 'warn' | 'fail'
 
+export type TargetEngine = 'unity' | 'godot' | 'cocos' | 'tiled' | 'aseprite'
+
 export interface GenerateRequest {
   projectName: string
   description: string
@@ -17,6 +19,8 @@ export interface GenerateRequest {
   palette: PaletteName
   consistencySeed: string
   stylePackName?: string
+  targetEngine: TargetEngine
+  namingPrefix?: string
 }
 
 export interface GeneratedAsset {
@@ -57,6 +61,8 @@ export interface StylePack {
   transparentBackground: boolean
   palette: PaletteName
   consistencySeed: string
+  targetEngine: TargetEngine
+  namingPrefix?: string
   updatedAt: string
 }
 
@@ -76,4 +82,10 @@ export interface PalettePreset {
   label: string
   value: PaletteName
   colors: string[]
+}
+
+export interface EnginePreset {
+  label: string
+  value: TargetEngine
+  hint: string
 }
