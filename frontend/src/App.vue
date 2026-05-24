@@ -33,6 +33,13 @@ import type {
 
 const store = useAssetStore()
 
+interface DemoScenario {
+  id: string
+  label: string
+  summary: string
+  request: GenerateRequest
+}
+
 const assetTypes: AssetTypePreset[] = [
   { label: '角色', value: 'character', hint: 'Character' },
   { label: '道具', value: 'item', hint: 'Item' },
@@ -65,6 +72,66 @@ const engines: EnginePreset[] = [
   { label: 'Aseprite', value: 'aseprite', hint: 'Sprite sheet editing' },
 ]
 
+const demoScenarios: DemoScenario[] = [
+  {
+    id: 'dungeon-pixel',
+    label: '地牢像素包',
+    summary: 'Unity 道具/瓦片素材包',
+    request: {
+      projectName: 'Dungeon Starter Kit',
+      description: '一套地牢探索游戏里的蓝色魔法水晶、入口石门和发光地砖',
+      assetType: 'item',
+      style: 'pixel',
+      size: 128,
+      count: 4,
+      transparentBackground: true,
+      palette: 'ocean',
+      consistencySeed: 'qiniu-dungeon-pack',
+      stylePackName: 'Dungeon Pixel Pack',
+      targetEngine: 'unity',
+      namingPrefix: 'dungeon_pixel',
+    },
+  },
+  {
+    id: 'forest-cartoon',
+    label: '森林卡通包',
+    summary: 'Godot 角色/道具素材包',
+    request: {
+      projectName: 'Forest Adventure Kit',
+      description: '一组森林冒险游戏的主角、蘑菇护符、叶片徽章和治疗果实',
+      assetType: 'character',
+      style: 'cartoon',
+      size: 128,
+      count: 4,
+      transparentBackground: true,
+      palette: 'forest',
+      consistencySeed: 'qiniu-forest-pack',
+      stylePackName: 'Forest Cartoon Kit',
+      targetEngine: 'godot',
+      namingPrefix: 'forest_cartoon',
+    },
+  },
+  {
+    id: 'scifi-ui',
+    label: '科幻 UI 包',
+    summary: 'Cocos 按钮/面板素材包',
+    request: {
+      projectName: 'Sci-fi HUD Kit',
+      description: '一套科幻机甲游戏的能量按钮、状态面板、技能图标和警报徽章',
+      assetType: 'ui',
+      style: 'sci-fi',
+      size: 128,
+      count: 4,
+      transparentBackground: true,
+      palette: 'mono',
+      consistencySeed: 'qiniu-scifi-ui-pack',
+      stylePackName: 'Sci-fi UI Kit',
+      targetEngine: 'cocos',
+      namingPrefix: 'scifi_ui',
+    },
+  },
+]
+
 const request = reactive<GenerateRequest>({
   projectName: 'Dungeon Starter Kit',
   description: '一套地牢探索游戏里的蓝色魔法水晶、入口石门和发光地砖',
@@ -82,6 +149,7 @@ const request = reactive<GenerateRequest>({
 
 const stylePackFormName = ref(request.stylePackName)
 const selectedStylePackId = ref('')
+const selectedDemoId = ref(demoScenarios[0].id)
 
 const activePalette = computed(() => palettes.find((palette) => palette.value === request.palette))
 const visibleAssets = computed(() => (store.generated.length > 0 ? store.generated : store.history.slice(0, 6)))
@@ -149,6 +217,26 @@ const applyStylePack = (pack: StylePack) => {
   request.consistencySeed = pack.consistencySeed
   request.targetEngine = pack.targetEngine
   request.namingPrefix = pack.namingPrefix
+}
+
+const applyDemoScenario = (scenario: DemoScenario) => {
+  Object.assign(request, scenario.request)
+  selectedDemoId.value = scenario.id
+  stylePackFormName.value = scenario.request.stylePackName
+  selectedStylePackId.value = normalizeId(scenario.request.stylePackName || scenario.label)
+  store.saveStylePack({
+    id: selectedStylePackId.value,
+    name: scenario.request.stylePackName || scenario.label,
+    description: scenario.request.description,
+    assetType: scenario.request.assetType,
+    style: scenario.request.style,
+    size: scenario.request.size,
+    transparentBackground: scenario.request.transparentBackground,
+    palette: scenario.request.palette,
+    consistencySeed: scenario.request.consistencySeed,
+    targetEngine: scenario.request.targetEngine,
+    namingPrefix: scenario.request.namingPrefix,
+  })
 }
 
 const removeStylePack = (pack: StylePack) => {
@@ -231,6 +319,25 @@ const exportMetadata = () => {
           <span>项目名称</span>
           <input v-model="request.projectName" type="text" />
         </label>
+
+        <div class="demo-scenario-box">
+          <div class="panel-title compact-inline">
+            <Sparkles :size="18" />
+            <h2>示例场景</h2>
+          </div>
+          <div class="demo-scenario-list">
+            <button
+              v-for="scenario in demoScenarios"
+              :key="scenario.id"
+              type="button"
+              :class="{ active: selectedDemoId === scenario.id }"
+              @click="applyDemoScenario(scenario)"
+            >
+              <span>{{ scenario.label }}</span>
+              <small>{{ scenario.summary }}</small>
+            </button>
+          </div>
+        </div>
 
         <div class="style-pack-box">
           <div class="style-pack-head">

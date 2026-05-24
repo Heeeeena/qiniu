@@ -40,6 +40,20 @@ const defaultStylePacks = (): StylePack[] => [
     namingPrefix: 'forest_cartoon',
     updatedAt: new Date().toISOString(),
   },
+  {
+    id: 'sci-fi-ui-kit',
+    name: 'Sci-fi UI Kit',
+    description: '科幻机甲游戏按钮、面板和技能图标的统一 UI 风格。',
+    assetType: 'ui',
+    style: 'sci-fi',
+    size: 128,
+    transparentBackground: true,
+    palette: 'mono',
+    consistencySeed: 'qiniu-scifi-ui-pack',
+    targetEngine: 'cocos',
+    namingPrefix: 'scifi_ui',
+    updatedAt: new Date().toISOString(),
+  },
 ]
 
 const normalizeStylePack = (pack: Partial<StylePack>, index: number): StylePack => ({

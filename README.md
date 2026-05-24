@@ -29,6 +29,38 @@ env     : Conda environment.yml
 
 当前版本使用本地 Pillow 生成器保证 Demo 可稳定运行。后续可在 `backend/app/services` 下替换为 OpenAI、Stable Diffusion、通义万相、火山方舟等图像生成服务。
 
+## 评审快速入口
+
+- Demo 视频：待录制后补充链接。
+- 在线仓库：`https://github.com/Heeeeena/qiniu`
+- 推荐演示案例：`Dungeon Pixel Pack`、`Forest Cartoon Kit`、`Sci-fi UI Kit`
+- 关键文档：
+  - `docs/product-design.md`
+  - `docs/demo-cases.md`
+  - `docs/demo-script.md`
+  - `docs/submission-checklist.md`
+
+## 3 分钟快速体验
+
+1. 启动后端和前端。
+2. 在左侧选择一个示例场景，例如 `地牢像素包`。
+3. 点击 `生成素材`，查看增强 Prompt、素材预览、约束标签和质量检查。
+4. 点击 `ZIP` 导出资产包。
+5. 解压 ZIP，检查：
+   - `images/*.png`
+   - `spritesheet/spritesheet.png`
+   - `spritesheet/spritesheet.json`
+   - `metadata.json`
+   - `engine-import-guide.md`
+
+## 产品亮点
+
+- 面向 2D 游戏项目，而不是通用图片生成。
+- 通过风格包、色板、尺寸、seed 控制同批次素材一致性。
+- 生成后提供质量检查，覆盖尺寸、透明通道、metadata、Sprite Sheet 和引擎导出。
+- 导出包包含 Sprite Sheet manifest 和目标引擎导入说明，可接入 Unity、Godot、Cocos、Tiled、Aseprite。
+- 当前使用本地生成器保证演示稳定，后端服务层已预留真实图像模型替换点。
+
 ## 本地启动
 
 ### 1. 安装前端依赖
@@ -146,6 +178,13 @@ qiniu/
 
 本仓库代码为本次议题从零构建。当前图片生成器为本地程序化生成方案，用于稳定演示完整产品闭环；真实模型接入点已在后端服务层预留。
 
-## Demo 视频
+## Demo 视频与截图
 
-待补充：提交前将 Demo 视频链接放置在此处。
+- Demo 视频链接：待补充。
+- 功能截图：建议补充工作台首页、生成结果、质量检查、ZIP 结构、spritesheet.json 五张图。
+
+## PR 开发记录
+
+- PR #1：项目风格包与质量检查。
+- PR #2：游戏引擎导出包、Sprite Sheet manifest 与批次命名。
+- PR #3：示例场景、提交检查清单与最终演示文档。
