@@ -31,7 +31,7 @@ env     : Conda environment.yml
 
 ## 评审快速入口
 
-- Demo 视频：待录制后补充链接。
+- Demo 视频：[5月25日.mp4](https://pan.baidu.com/s/1YlRno-fYufnakrONRjqqog?pwd=2xs8)，提取码：`2xs8`
 - 在线仓库：`https://github.com/Heeeeena/qiniu`
 - 推荐演示案例：`Dungeon Pixel Pack`、`Forest Cartoon Kit`、`Sci-fi UI Kit`
 - 关键文档：
@@ -180,8 +180,13 @@ qiniu/
 
 ## Demo 视频与截图
 
-- Demo 视频链接：待补充。
-- 功能截图：建议补充工作台首页、生成结果、质量检查、ZIP 结构、spritesheet.json 五张图。
+- Demo 视频：[5月25日.mp4](https://pan.baidu.com/s/1YlRno-fYufnakrONRjqqog?pwd=2xs8)，提取码：`2xs8`
+
+### 功能截图
+
+![工作台首页](docs/images/01-workbench.png)
+![生成结果](docs/images/02-generated-assets.png)
+![导出包结构](docs/images/03-export-package.png)
 
 ## PR 开发记录
 
