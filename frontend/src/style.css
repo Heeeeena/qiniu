@@ -408,15 +408,17 @@ select:focus {
 .style-pack-list {
   display: grid;
   gap: 7px;
-  max-height: 146px;
-  overflow: auto;
+  max-height: 196px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .style-pack-list button {
   display: grid;
   gap: 2px;
-  min-height: 48px;
-  padding: 8px 9px;
+  align-content: center;
+  min-height: 54px;
+  padding: 9px 10px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #ffffff;
@@ -439,11 +441,13 @@ select:focus {
 
 .style-pack-list span {
   font-weight: 750;
+  line-height: 1.25;
 }
 
 .style-pack-list small {
   color: var(--muted);
   font-size: 12px;
+  line-height: 1.25;
 }
 
 .spin {
